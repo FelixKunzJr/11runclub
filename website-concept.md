@@ -29,9 +29,11 @@ Grain, Bewegungsunschärfe.
 4. **Was wir machen:** Die Lauf-Formate als Poster-Karten im Insta-Stil:
    TUESDAY RUN · LONGRUN · HILL REPS · PROGRESSION RUN · OUT & BACK.
    Beim Scrollen nacheinander einblenden (Apple-Mechanik).
-5. **Events / Races:** Grosse Event-Bühne für selbst organisierte Läufe
-   (z. B. Longrun-Events mit SOL-ID). Poster-Look: S/W-Foto, rote Typo, Datum gross,
-   Karo-Motiv. Vergangene Events als Archiv-Strip.
+5. **Events / Races:** Grosse Event-Bühne — aktuell der **ENTER HILLCLIMB**
+   (FR 25.09.2026, 4er-Staffel aufs Parkdeck der ENTER Technikwelt Derendingen),
+   gepinnt mit scrollgesteuertem Aufbau, verlinkt auf die eigene Landing Page
+   `enter-hillclimb.html`. Poster-Look: rote Fläche, riesige Typo, Datum gross.
+   Vergangene Events später als Archiv-Strip.
 6. **Community:** Foto-Marquee (echte Insta-Fotos), Zahl der Läufer:innen,
    Slogan RUN TOGETHER. IMPROVE TOGETHER. ENJOY TOGETHER. als durchlaufende Zeile.
 7. **Join:** Drei grosse Buttons — WhatsApp Community, Strava Club, Instagram.

@@ -25,8 +25,14 @@ Instagram-Auftritt und Linktree des Clubs recherchiert. Lies zuerst
 - **Tuesday Run:** jeden Dienstag 18:30, Treffpunkt SOL-ID Athletes World, Klosterplatz 6, 4500 Solothurn
 - **Longruns:** samstags 09:30, wahlweise 10 oder 15 km, Start vor dem SOL-ID
 - Weitere Formate aus Posts: Hill Reps, Progression Run, Out & Back
-- **Keine Anmeldung nötig** — zentrale Botschaft, immer kommunizieren
+- **Keine Anmeldung nötig** (für die wöchentlichen Runs) — zentrale Botschaft, immer kommunizieren
 - Slogan: **RUN TOGETHER. IMPROVE TOGETHER. ENJOY TOGETHER.**
+- **ENTER HILLCLIMB** — das eigene Rennen des Clubs (Datum aus Insta-Highlight
+  „SAVE THE DATE": **FR 25.09.2026**): Staffel-Rennen in 4er-Teams in der ENTER
+  Technikwelt Derendingen, die Rampen rauf aufs Parkdeck und runter, ziemlich steil,
+  Ziel 100+ Teilnehmende. Startzeit/Reglement/Anmeldung: **Infos folgen** — auf der
+  Landing Page (`preview/enter-hillclimb.html`) nichts erfinden, Platzhalter
+  „Infos folgen" stehen lassen, bis der Club Details liefert.
 - Partner: SOL-ID Athletes World (Treffpunkt/Supporter), peaq hydration („Hydrated by")
 - Linktree (linktr.ee/11RUNCLUB) enthält nur: WhatsApp Community + Strava Club.
   Die Website soll das Linktree als Link-in-Bio ersetzen.
@@ -65,9 +71,10 @@ Slogan-Marquee, Join-Buttons, Footer und am Ende ein Design-System-Anhang (Style
 ## Regeln für Weiterentwicklung
 
 - **Kommende Routen sind nie publik** (Clubprinzip, vom Club bestätigt Juni 2026):
-  niemals eine konkrete oder generische Streckenkarte für einen zukünftigen Run zeigen.
-  Publik sind nur Start/Ziel (SOL-ID) und Distanz. Die geheime Route wird als
-  Gestaltungselement inszeniert („Die Route? Erfährst du am Start.").
+  niemals die *echte* Strecke eines zukünftigen Runs zeigen. Eine als solche
+  gekennzeichnete **Beispielroute** (~6 km, Solothurn-Schema: Aare-Ufer/Altstadt/St. Ursen)
+  ist okay und gewünscht — immer mit Hinweis „Beispielroute, die echte Strecke gibts am Start".
+  (Ein früherer „?"-Mystery-Ansatz wurde vom Club verworfen — nicht wieder einführen.)
 - **Scroll-Animationen dosiert** (Club mag die Apple-Scroll-Mechanik, Juni 2026):
   Scroll-Reveals überall okay; *ein* gepinnter scrollgesteuerter Moment pro Seite
   (aktuell die Event-Sektion). Kein Scroll-Hijacking, nur transform/opacity animieren.

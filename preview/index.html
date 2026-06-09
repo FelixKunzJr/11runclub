@@ -134,14 +134,17 @@
   .countdown .lbl { font-size: 10px; letter-spacing: .2em; color: var(--ash); margin-top: 2px; }
   .countdown__title { font-size: 11px; letter-spacing: .2em; color: var(--red); width: 100%; margin-bottom: 8px; }
 
-  /* ---- mystery route (Route ist vor dem Run geheim) ---- */
-  .mystery-path {
-    fill: none; stroke-width: 3.5;
+  /* ---- beispiel-route (echte Strecken sind vor dem Run nie publik) ---- */
+  .route-line {
+    fill: none; stroke: var(--red); stroke-width: 3.5;
     stroke-linecap: round; stroke-linejoin: round;
-    stroke-dasharray: 4 14;
-    animation: march 1.4s linear infinite;
+    stroke-dasharray: 1700; stroke-dashoffset: 1700;
+    transition: stroke-dashoffset 2.4s cubic-bezier(.45,0,.2,1) .3s;
   }
-  @keyframes march { to { stroke-dashoffset: -18; } }
+  .next__map.in .route-line { stroke-dashoffset: 0; }
+  .km-dot { fill: var(--chalk); }
+  .km-num { font-family: var(--mono); font-size: 10px; fill: var(--black); font-weight: 600; }
+  .map-tag { font-family: var(--mono); font-size: 10px; letter-spacing: .25em; fill: rgba(244,241,235,.45); }
   .mystery-note {
     font-family: var(--mono); font-size: 12px; letter-spacing: .14em;
     color: var(--coral); margin-top: 10px;
@@ -350,6 +353,7 @@
     <span>NÄCHSTER RUN — DIENSTAG 18:30</span><span class="dot">●</span>
     <span>TREFFPUNKT: SOL-ID, KLOSTERPLATZ 6, 4500 SOLOTHURN</span><span class="dot">●</span>
     <span>KEINE ANMELDUNG NÖTIG</span><span class="dot">●</span>
+    <span>ENTER HILLCLIMB — 25.09.2026 — SAVE THE DATE</span><span class="dot">●</span>
     <span>ALLE LEVELS WILLKOMMEN</span><span class="dot">●</span>
   </div>
 </div>
@@ -405,21 +409,19 @@
   <h2 class="reveal">Jeden Dienstag.<br>18:30. Punkt.</h2>
   <div class="next__grid">
     <div class="next__map reveal">
-      <div class="maplabel"><span>ROUTE — TUESDAY RUN</span><span>±5–8 KM</span></div>
+      <div class="maplabel"><span>BEISPIEL-ROUTE — TUESDAY RUN</span><span>±6 KM</span></div>
       <svg viewBox="0 0 560 300">
-        <defs>
-          <linearGradient id="fadeout" x1="0" y1="1" x2="1" y2="0">
-            <stop offset="0" stop-color="#EE3829" stop-opacity="1"/>
-            <stop offset=".55" stop-color="#EE3829" stop-opacity=".5"/>
-            <stop offset=".9" stop-color="#EE3829" stop-opacity="0"/>
-          </linearGradient>
-        </defs>
-        <path class="mystery-path" stroke="url(#fadeout)" d="M40,250 C90,180 60,120 140,110 S260,160 300,110 S370,30 430,75"/>
-        <circle cx="40" cy="250" r="7" fill="#EE3829"/>
-        <text x="56" y="255" fill="#F4F1EB" font-family="IBM Plex Mono" font-size="11" letter-spacing="2">START / ZIEL — SOL-ID</text>
-        <text x="448" y="86" fill="#F4F1EB" font-family="Anton" font-size="66" opacity=".9">?</text>
+        <path class="route-line" d="M95,245 C160,254 230,256 285,246 S400,222 438,190 S486,124 444,92 S330,58 258,72 S148,94 120,142 S64,206 95,245 Z"/>
+        <circle cx="95" cy="245" r="7" fill="#EE3829"/>
+        <text x="112" y="250" fill="#F4F1EB" font-family="IBM Plex Mono" font-size="11" letter-spacing="2">START / ZIEL — SOL-ID</text>
+        <text class="map-tag" x="300" y="282">AARE-UFER</text>
+        <text class="map-tag" x="250" y="160">ALTSTADT</text>
+        <text class="map-tag" x="270" y="48">ST. URSEN</text>
+        <g><circle class="km-dot" cx="404" cy="218" r="8"/><text class="km-num" x="401" y="222">2</text></g>
+        <g><circle class="km-dot" cx="444" cy="92" r="8"/><text class="km-num" x="441" y="96">4</text></g>
+        <g><circle class="km-dot" cx="120" cy="142" r="8"/><text class="km-num" x="117" y="146">5</text></g>
       </svg>
-      <p class="mystery-note">→ Die Route? Erfährst du am Start.</p>
+      <p class="mystery-note">→ Beispielroute. Die echte Strecke gibts jeweils am Start.</p>
       <div class="checker" style="position:absolute; bottom:20px; right:22px;"></div>
     </div>
     <div>
@@ -480,17 +482,17 @@
 <div class="pin" id="events">
 <section class="event">
   <div class="event__circle" aria-hidden="true"></div>
-  <div class="kicker">Save the Date</div>
+  <div class="kicker">Save the Date — Unser Rennen</div>
   <div class="event__big">
-    Solothurn<br><span class="outline">Longrun</span>
+    Enter<br><span class="outline">Hillclimb</span>
   </div>
   <div class="event__row">
     <div class="event__data">
-      SA 13. JUNI — 09:30<br>
-      10 KM ODER 15 KM — DU ENTSCHEIDEST<br>
-      START: SOL-ID, KLOSTERPLATZ 6
+      FR 25.09.2026 — ENTER TECHNIKWELT, DERENDINGEN<br>
+      4ER-STAFFEL — RAUFS PARKDECK UND RUNTER<br>
+      100+ LÄUFER:INNEN — INFOS FOLGEN
     </div>
-    <a class="btn btn--chalk" href="#join">Ich bin dabei →</a>
+    <a class="btn btn--chalk" href="enter-hillclimb.html">Zur Race-Page →</a>
   </div>
 </section>
 </div>
