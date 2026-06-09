@@ -134,17 +134,18 @@
   .countdown .lbl { font-size: 10px; letter-spacing: .2em; color: var(--ash); margin-top: 2px; }
   .countdown__title { font-size: 11px; letter-spacing: .2em; color: var(--red); width: 100%; margin-bottom: 8px; }
 
-  /* ---- route divider ---- */
-  .route-wrap { background: var(--chalk); padding: 0 0 0; line-height: 0; }
-  .route-wrap svg { width: 100%; height: auto; display: block; }
-  .route-path {
-    fill: none; stroke: var(--red); stroke-width: 3.5;
+  /* ---- mystery route (Route ist vor dem Run geheim) ---- */
+  .mystery-path {
+    fill: none; stroke-width: 3.5;
     stroke-linecap: round; stroke-linejoin: round;
-    stroke-dasharray: 2400; stroke-dashoffset: 2400;
-    transition: stroke-dashoffset 2.6s cubic-bezier(.45,0,.2,1);
+    stroke-dasharray: 4 14;
+    animation: march 1.4s linear infinite;
   }
-  .route-wrap.drawn .route-path,
-  .next__map.drawn .route-path { stroke-dashoffset: 0; }
+  @keyframes march { to { stroke-dashoffset: -18; } }
+  .mystery-note {
+    font-family: var(--mono); font-size: 12px; letter-spacing: .14em;
+    color: var(--coral); margin-top: 10px;
+  }
 
   /* ---- sections base ---- */
   section { padding: clamp(70px, 10vw, 140px) clamp(20px, 4vw, 56px); }
@@ -226,7 +227,24 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* ---- event (poster) ---- */
+  /* ---- event (poster, gepinnter Scroll-Moment) ---- */
+  .pin { height: 220vh; position: relative; }
+  .pin .event {
+    position: sticky; top: 0; min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  .pin .kicker { opacity: var(--p1, 0); }
+  .pin .event__big {
+    opacity: var(--p1, 0);
+    transform: translateY(calc((1 - var(--p1, 0)) * 90px));
+  }
+  .pin .event__row {
+    opacity: var(--p2, 0);
+    transform: translateY(calc((1 - var(--p2, 0)) * 50px));
+  }
+  .pin .event__circle {
+    transform: rotate(calc(var(--p, 0) * 14deg)) scale(calc(.9 + var(--p, 0) * .14));
+  }
   .event { background: var(--red); color: var(--chalk); position: relative; overflow: hidden; }
   .event .kicker { color: var(--chalk); } .event .kicker::before { background: var(--chalk); }
   .event__big {
@@ -316,8 +334,11 @@
   .reveal.in { opacity: 1; transform: none; }
   @media (prefers-reduced-motion: reduce) {
     .reveal { opacity: 1; transform: none; transition: none; }
-    .ticker__track, .slogan__track, .card .ring { animation: none; }
-    .route-path { stroke-dashoffset: 0; transition: none; }
+    .ticker__track, .slogan__track, .card .ring, .mystery-path { animation: none; }
+    .pin { height: auto; }
+    .pin .kicker, .pin .event__big, .pin .event__row { opacity: 1; transform: none; }
+    .pin .event__circle { transform: none; }
+    .pin .event { position: static; min-height: 0; }
   }
 </style>
 </head>
@@ -378,13 +399,6 @@
   </div>
 </header>
 
-<!-- route divider -->
-<div class="route-wrap" id="routeDivider" aria-hidden="true">
-  <svg viewBox="0 0 1440 120" preserveAspectRatio="none">
-    <path class="route-path" d="M-20,80 C120,30 200,110 330,70 S540,20 660,75 S870,115 990,55 S1180,15 1290,70 S1420,95 1470,60"/>
-  </svg>
-</div>
-
 <!-- next run -->
 <section class="next" id="next">
   <div class="kicker reveal">Next Run</div>
@@ -393,10 +407,19 @@
     <div class="next__map reveal">
       <div class="maplabel"><span>ROUTE — TUESDAY RUN</span><span>±5–8 KM</span></div>
       <svg viewBox="0 0 560 300">
-        <path class="route-path route-inner" d="M40,250 C90,180 60,120 140,110 S260,160 300,110 S370,30 440,70 S530,150 480,210 S360,270 280,240 S120,290 40,250 Z" />
+        <defs>
+          <linearGradient id="fadeout" x1="0" y1="1" x2="1" y2="0">
+            <stop offset="0" stop-color="#EE3829" stop-opacity="1"/>
+            <stop offset=".55" stop-color="#EE3829" stop-opacity=".5"/>
+            <stop offset=".9" stop-color="#EE3829" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path class="mystery-path" stroke="url(#fadeout)" d="M40,250 C90,180 60,120 140,110 S260,160 300,110 S370,30 430,75"/>
         <circle cx="40" cy="250" r="7" fill="#EE3829"/>
         <text x="56" y="255" fill="#F4F1EB" font-family="IBM Plex Mono" font-size="11" letter-spacing="2">START / ZIEL — SOL-ID</text>
+        <text x="448" y="86" fill="#F4F1EB" font-family="Anton" font-size="66" opacity=".9">?</text>
       </svg>
+      <p class="mystery-note">→ Die Route? Erfährst du am Start.</p>
       <div class="checker" style="position:absolute; bottom:20px; right:22px;"></div>
     </div>
     <div>
@@ -454,13 +477,14 @@
 </section>
 
 <!-- event -->
-<section class="event" id="events">
+<div class="pin" id="events">
+<section class="event">
   <div class="event__circle" aria-hidden="true"></div>
-  <div class="kicker reveal">Save the Date</div>
-  <div class="event__big reveal">
+  <div class="kicker">Save the Date</div>
+  <div class="event__big">
     Solothurn<br><span class="outline">Longrun</span>
   </div>
-  <div class="event__row reveal">
+  <div class="event__row">
     <div class="event__data">
       SA 13. JUNI — 09:30<br>
       10 KM ODER 15 KM — DU ENTSCHEIDEST<br>
@@ -469,6 +493,7 @@
     <a class="btn btn--chalk" href="#join">Ich bin dabei →</a>
   </div>
 </section>
+</div>
 
 <!-- slogan -->
 <div class="slogan" aria-hidden="true">
@@ -568,20 +593,38 @@
   }
   tick(); setInterval(tick, 1000);
 
-  // scroll reveals + route draw
+  // scroll reveals
   const io = new IntersectionObserver((entries) => {
     for (const e of entries) {
       if (!e.isIntersecting) continue;
-      e.target.classList.add(e.target.classList.contains('route-wrap') ? 'drawn' : 'in');
+      e.target.classList.add('in');
       io.unobserve(e.target);
     }
   }, { threshold: 0.18 });
-  document.querySelectorAll('.reveal, .route-wrap, .next__map').forEach(el => io.observe(el));
-  document.querySelectorAll('.next__map').forEach(el => {
-    new IntersectionObserver((es, o) => es.forEach(x => {
-      if (x.isIntersecting) { el.classList.add('drawn'); o.disconnect(); }
-    }), { threshold: .3 }).observe(el);
-  });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // pinned event section + hero parallax (scroll-driven, Apple mechanic)
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    const pin = document.querySelector('.pin');
+    const ev = pin.querySelector('.event');
+    const eleven = document.querySelector('.hero__eleven');
+    const clamp01 = v => Math.min(1, Math.max(0, v));
+    const stage = (p, a, b) => clamp01((p - a) / (b - a));
+    let ticking = false;
+    function update() {
+      ticking = false;
+      const r = pin.getBoundingClientRect();
+      const p = clamp01(-r.top / (r.height - innerHeight));
+      ev.style.setProperty('--p', p);
+      ev.style.setProperty('--p1', stage(p, 0, .35));
+      ev.style.setProperty('--p2', stage(p, .25, .6));
+      eleven.style.transform = `translateY(${scrollY * .12}px)`;
+    }
+    addEventListener('scroll', () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+  }
 </script>
 </body>
 </html>

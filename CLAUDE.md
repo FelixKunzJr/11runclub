@@ -56,13 +56,21 @@ cd preview && python3 -m http.server 8771   # → http://localhost:8771
 ```
 
 Eine einzige HTML-Datei, Fonts via Google Fonts, kein Build. Enthält: Ticker,
-Hero mit Live-Countdown (nächster Dienstag 18:30, lokale Zeit), selbstzeichnende
-Routenlinie (IntersectionObserver), Format-Karten, Event-Poster, Slogan-Marquee,
-Join-Buttons, Footer und am Ende ein Design-System-Anhang (Style Tile).
+Hero mit Live-Countdown (nächster Dienstag 18:30, lokale Zeit) und Parallax-„11",
+„Geheime Route"-Karte (gestrichelte Linie ab SOL-ID, endet im „?"), Format-Karten,
+gepinnte Event-Sektion (scrollgesteuerter Aufbau — der eine Apple-Moment der Seite),
+Slogan-Marquee, Join-Buttons, Footer und am Ende ein Design-System-Anhang (Style Tile).
 `prefers-reduced-motion` wird respektiert — beibehalten.
 
 ## Regeln für Weiterentwicklung
 
+- **Kommende Routen sind nie publik** (Clubprinzip, vom Club bestätigt Juni 2026):
+  niemals eine konkrete oder generische Streckenkarte für einen zukünftigen Run zeigen.
+  Publik sind nur Start/Ziel (SOL-ID) und Distanz. Die geheime Route wird als
+  Gestaltungselement inszeniert („Die Route? Erfährst du am Start.").
+- **Scroll-Animationen dosiert** (Club mag die Apple-Scroll-Mechanik, Juni 2026):
+  Scroll-Reveals überall okay; *ein* gepinnter scrollgesteuerter Moment pro Seite
+  (aktuell die Event-Sektion). Kein Scroll-Hijacking, nur transform/opacity animieren.
 - Keine Stock-Fotos. Nur echte Club-Fotos (Originale beim Team anfragen, Insta-Screenshots reichen nicht).
 - Rot braucht Ruhe drumherum: pro Sektion eine dominante Grundfläche (Chalk/Black/Red).
 - Headlines: Anton, Versalien, line-height ~0.9, dürfen am Rand anschneiden.

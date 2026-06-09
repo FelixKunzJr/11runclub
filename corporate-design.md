@@ -50,7 +50,11 @@ Typo-Regeln:
 ## Grafische Motive (das Wiedererkennungs-Set)
 
 1. **Der Kreis** — aus dem Logo abgeleitet: runde Fotomasken, runde Badges, Countdown-Ring.
-2. **Die Routenlinie** — handgezeichnete rote Streckenlinie als animiertes SVG (Strecken, Trenner, Unterstreichungen).
+2. **Die geheime Route** — Clubprinzip: Die Strecke ist vor dem Run nie publik, sie wird
+   erst am Start verraten. Grafisch deshalb keine echten oder generischen Streckenkarten
+   für kommende Runs — stattdessen eine gestrichelte rote Linie, die ab Start/Ziel (SOL-ID,
+   das ist publik) ins Ungewisse läuft und in einem „?" endet. Botschaft: „Die Route?
+   Erfährst du am Start." Das Geheimnis ist Teil des Erlebnisses.
 3. **Das Karo** — Zielflaggen-Pixelraster als Trenner und Akzent (sparsam).
 4. **Grain** — feines Filmkorn über Fotos und dunklen Flächen, gegen den sterilen Digital-Look.
 5. **Die „11"** — als überdimensionales typografisches Wasserzeichen im Hintergrund.

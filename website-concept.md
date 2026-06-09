@@ -22,8 +22,10 @@ Grain, Bewegungsunschärfe.
 2. **Hero:** Vollbild. Riesige Headline „DEIN RUNCLUB IN SOLOTHURN.", dahinter
    Club-Foto/Video mit Bewegungsunschärfe. Countdown zum nächsten Run als Mono-Badge.
    Zwei CTAs: „Mitlaufen (WhatsApp)" + „Nächste Runs".
-3. **Next Run:** Schwarze Sektion. Animierte rote Routenlinie (SVG der echten
-   Dienstags-Strecke), daneben Mono-Daten: Tag, Zeit, Treffpunkt, Distanzen, „keine Anmeldung nötig".
+3. **Next Run:** Schwarze Sektion. Mono-Daten: Tag, Zeit, Treffpunkt, Distanzen,
+   „keine Anmeldung nötig". Die Route selbst ist vor dem Run **geheim** (Clubprinzip) —
+   inszeniert als gestrichelte Linie ab SOL-ID, die im Ungewissen endet:
+   „Die Route? Erfährst du am Start."
 4. **Was wir machen:** Die Lauf-Formate als Poster-Karten im Insta-Stil:
    TUESDAY RUN · LONGRUN · HILL REPS · PROGRESSION RUN · OUT & BACK.
    Beim Scrollen nacheinander einblenden (Apple-Mechanik).
@@ -39,7 +41,9 @@ Grain, Bewegungsunschärfe.
 ## Interaktion & Motion (das „Innovative", ohne Spielerei)
 
 - **Scroll-Reveals** mit Stagger — Inhalte schieben sich präzise ins Bild (IntersectionObserver / Motion).
-- **Routenlinie zeichnet sich beim Scrollen** (SVG stroke-dashoffset) — Signature-Moment der Seite.
+- **Gepinnter Event-Moment** — Signature-Moment der Seite: Die Event-Sektion bleibt beim
+  Scrollen kurz stehen (sticky), Headline und Datum bauen sich scrollgesteuert auf —
+  die Apple-Mechanik, bewusst nur an dieser einen Stelle eingesetzt.
 - **Marquee-Ticker** oben + Slogan-Marquee — Tempo-Gefühl, läuft endlos wie ein Long Run.
 - **Live-Countdown** zum nächsten Dienstag 18:30 — die Seite fühlt sich „in Bewegung" an.
 - **Hover:** Poster-Karten kippen leicht / Foto wechselt von S/W zu Farbe.
