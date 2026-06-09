@@ -1,6 +1,8 @@
 # 11RUNCLUB Website — Projekt-Kontext
 
 Website für den 11RUNCLUB, einen Runclub in Solothurn (Schweiz), Instagram: @11.runclub.
+Live-Preview: https://11runclub.vercel.app · Repo: https://github.com/FelixKunzJr/11runclub
+(Vercel ist mit dem Repo verbunden: Push auf `main` → Production-Deploy, PRs → Preview-URLs.)
 Dieses Dokument ist die Wissensbasis: Alles hier wurde im Juni 2026 direkt aus dem
 Instagram-Auftritt und Linktree des Clubs recherchiert. Lies zuerst
 `corporate-design.md` (CI) und `website-concept.md` (Seitenkonzept) — sie sind verbindlich.
