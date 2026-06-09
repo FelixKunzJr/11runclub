@@ -55,6 +55,16 @@ Instagram-Auftritt und Linktree des Clubs recherchiert. Lies zuerst
   Condensed-Versalien, Grain, Bewegungsunschärfe). Der Club wünscht sich explizit
   Apple-Niveau, will aber seine eigene CI behalten.
 
+## Referenzmaterial
+
+`reference/` enthält vom Auftraggeber bereitgestellte Referenzbilder der ENTER
+Technikwelt (Axonometrie-Diagramm mit der umlaufenden Rampe aufs Dach-Parkdeck
+sowie ein Gebäudefoto). **Nur als Gestaltungsreferenz verwenden, nicht auf der
+Website veröffentlichen** — Urheber-/Lizenzlage ungeklärt (Foto vermutlich
+Wikimedia, Diagramm vom Architekturbüro). Wichtigste Erkenntnis daraus: Die
+Rampe läuft aussen ums Gebäude bis aufs Parkdeck über dem obersten Geschoss —
+die Serpentinen-Grafik der Race-Page entspricht dem Prinzip.
+
 ## Arbeiten mit dem Mock
 
 ```bash
