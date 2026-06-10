@@ -105,7 +105,7 @@ def run_south(off, x0, x1, z0, z1, n=22):
 def run_west(off, y0, y1, z0, z1, n=26):
     return [(L + off, y0 + (y1 - y0) * (i / n), z0 + (z1 - z0) * ease(i / n)) for i in range(n + 1)]
 
-RO = 0.45
+RO = 0.30
 def route_up(off):
     pts = [(1.8, W + 3.4, 0), (0.9, W + 1.3, 0), (0.7, W + off, 0.02)]
     pts += corner((0.7, W + off), (-off, W - 0.8), 0.02, 0.12)
@@ -120,11 +120,11 @@ def route_up(off):
 up = route_up(RO)
 arrive = up[-1]
 lap = [arrive,
-       (L - 0.8, W - 1.8, Z3 + 0.02), (L - 0.8, 2.0, Z3 + 0.02), (L - 1.6, 3.3, Z3 + 0.02),
+       (L - 0.8, W - 1.8, Z3 + 0.02), (L - 0.8, 4.4, Z3 + 0.02), (L - 1.8, 3.5, Z3 + 0.02),
        (3.0, 3.4, Z3 + 0.02), (2.1, 4.3, Z3 + 0.02), (2.1, W - 1.6, Z3 + 0.02),
        (3.2, W - 0.9, Z3 + 0.02), (7.0, W - 0.9, Z3 + 0.02), (11.0, W - 1.0, Z3 + 0.02),
        (L - 1.6, W - 0.9, Z3 + 0.02), arrive]
-down = list(reversed(route_up(RO - 0.22)))
+down = list(reversed(route_up(RO - 0.14)))
 down += [(0.95, W + 1.35, 0), (1.85, W + 3.35, 0)]
 route = up + lap[1:] + down
 n_up, n_lap = len(up), len(lap) - 1
@@ -146,35 +146,18 @@ for zz in (DRUM['z0'], DRUM['z1']):
     addline('deck', [(DRUM['c'][0] + DRUM['r'] * math.cos(2 * math.pi * i / n),
                       DRUM['c'][1] + DRUM['r'] * math.sin(2 * math.pi * i / n), zz) for i in range(n + 1)])
 
-for i in range(7):
-    x = 4.0 + i * 1.3
-    add('deck', (x, 4.4, Z3 + 0.01), (x, 7.2, Z3 + 0.01))
-add('deck', (4.0, 4.4, Z3 + 0.01), (4.0 + 6 * 1.3, 4.4, Z3 + 0.01))
-add('deck', (4.0, 7.2, Z3 + 0.01), (4.0 + 6 * 1.3, 7.2, Z3 + 0.01))
-def boxlines(x0, y0, x1, y1, z):
-    addline('deck', [(x0, y0, z), (x1, y0, z), (x1, y1, z), (x0, y1, z), (x0, y0, z)])
-boxlines(6.7, 4.7, 7.6, 6.6, Z3 + 0.16)
-boxlines(6.9, 5.1, 7.4, 6.2, Z3 + 0.34)
+# (Parkfelder, Auto und Schildrahmen entfernt — Club-Feedback Juni 2026)
 
-# Schild Nordkante
-add('deck', (4.3, W - 0.25, Z3 + RAIL), (4.3, W - 0.25, Z3 + 1.0))
-add('deck', (10.8, W - 0.25, Z3 + RAIL), (10.8, W - 0.25, Z3 + 1.0))
-add('deck', (4.3, W - 0.25, Z3 + 1.0), (10.8, W - 0.25, Z3 + 1.0))
-
-# Rampenband West (sichtbar) + Stummel Nord
-band = run_west(0.06, 0.0, W, Z2 + 0.1, Z3 + 0.02)
-addline('ramp', band)
-addline('ramp', [(x, y, z - 0.2) for (x, y, z) in band])
-stub = [(2.2, W + 0.06, 0.02)] + corner((1.0, W + 0.06), (-0.06, W - 1.0), 0.04, 0.14) + run_east(0.06, W - 1.1, W - 3.0, 0.14, 0.4)
-addline('ramp', stub)
-addline('ramp', [(x, y, z - 0.18) for (x, y, z) in stub])
-# Rampenbaender Ost + Sued (beim Drehen sichtbar)
-be = run_east(0.06, W - 1.0, 0.9, 0.12, Z1)
-addline('ramp', be)
-addline('ramp', [(x, y, z - 0.2) for (x, y, z) in be])
-bs = run_south(0.06, 0.9, L - 0.9, Z1 + 0.14, Z2)
-addline('ramp', bs)
-addline('ramp', [(x, y, z - 0.2) for (x, y, z) in bs])
+# Rampe als durchgehendes Band um Ost-, Sued- und Westfassade:
+# wird im Frontend als Ribbon-Mesh mit hellen Kanten gebaut,
+# damit die Rampe im Drahtmodell wirklich sichtbar ist.
+BOFF = 0.14
+band_path = corner((1.2, W + BOFF), (-BOFF, W - 1.0), 0.04, 0.12)
+band_path += run_east(BOFF, W - 1.1, 0.9, 0.12, Z1)
+band_path += corner((-BOFF, 0.8), (0.8, -BOFF), Z1, Z1 + 0.14)
+band_path += run_south(BOFF, 0.9, L - 0.9, Z1 + 0.14, Z2)
+band_path += corner((L - 0.8, -BOFF), (L + BOFF, 0.8), Z2, Z2 + 0.14)
+band_path += run_west(BOFF, 0.9, W - 0.6, Z2 + 0.14, Z3)
 
 # ---------- Vorplatz ----------
 for i in range(4):
@@ -202,6 +185,7 @@ data = {
     'drum': DRUM,
     'groups': groups,
     'route': [[round(v, 2) for v in p] for p in route],
+    'band': [[round(v, 2) for v in p] for p in band_path],
     'fracUp': round(n_up / len(route), 3),
     'fracLap': round((n_up + n_lap) / len(route), 3),
     'labels': labels,
