@@ -878,7 +878,7 @@
   wrap.appendChild(renderer.domElement);
   planSection.classList.add('plan--3d');
   const hint = planSection.querySelector('.plan__hint');
-  if (hint) hint.textContent = 'ZIEHEN = DREHEN · DIE LINIE LÄUFT MIT DEINEM SCROLL ↓';
+  if (hint) hint.textContent = 'ZIEHEN = DREHEN · DIE ROUTE LÄUFT VON SELBST';
 
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(33, 1, 0.1, 400);
@@ -946,9 +946,13 @@
     return { el, v: V(l.p), at: l.at };
   });
 
-  // Kamera: Blick von Nordwesten, leichtes Schwanken bis zum ersten Drehen
-  const target = new THREE.Vector3(0, D.H * .42, 0);
-  const R = D.L * 1.6, POLAR = .48;
+  // Kamera: Blick von Nordwesten, leichtes Schwanken bis zum ersten Drehen.
+  // Die Distanz wird automatisch so gewaehlt, dass die ganze Szene in den
+  // Canvas passt (vertikal UND horizontal) — nichts wird abgeschnitten.
+  const sphere = new THREE.Box3().setFromObject(scene).getBoundingSphere(new THREE.Sphere());
+  const target = sphere.center.clone();
+  let R = 1;
+  const POLAR = .48;
   const AZ0 = Math.PI * .78;
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.copy(target);
@@ -971,8 +975,12 @@
       target.z + R * Math.cos(az) * Math.cos(POLAR));
     camera.lookAt(target);
   }
-  setCam(AZ0);
-  controls.update();
+  function fitCamera() {
+    const vFov = camera.fov * Math.PI / 180;
+    const hFov = 2 * Math.atan(Math.tan(vFov / 2) * camera.aspect);
+    R = sphere.radius / Math.sin(Math.min(vFov, hFov) / 2) * 1.04;
+    controls.minDistance = controls.maxDistance = R;
+  }
 
   function resize() {
     const w = wrap.clientWidth, h = wrap.clientHeight;
@@ -980,23 +988,26 @@
     renderer.setSize(w, h);
     camera.aspect = w / h;
     camera.updateProjectionMatrix();
+    fitCamera();
+    if (!userTurned) setCam(AZ0);
+    controls.update();
   }
   new ResizeObserver(resize).observe(wrap);
   resize();
 
-  let t = 0;
-  function progress() {
-    const r = pin.getBoundingClientRect();
-    const p = Math.min(1, Math.max(0, (innerHeight - r.top) / (innerHeight + r.height)));
-    t = Math.min(1, Math.max(0, (p - 0.16) / 0.64));
-  }
+  // Die Route laeuft von selbst (Loop: zeichnen, kurz halten, von vorn) —
+  // unabhaengig vom Scrollen. Drehen bleibt jederzeit moeglich.
+  const DUR = 16, HOLD = 3;
+  let t = 0, animT = 0, time = 0;
 
   let visible = false, raf = 0;
   const clock = new THREE.Clock();
   function frame() {
     raf = visible ? requestAnimationFrame(frame) : 0;
-    progress();
-    const time = clock.getElapsedTime();
+    const dt = Math.min(clock.getDelta(), .05);   // unsichtbare Zeit nicht aufholen
+    time += dt;
+    animT = (animT + dt) % (DUR + HOLD);
+    t = Math.min(1, animT / DUR);
     if (!userTurned) setCam(AZ0 + Math.sin(time * .25) * .1);
     controls.update();
 
