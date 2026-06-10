@@ -34,9 +34,14 @@ for z in (Z1, Z2):
     addline('hidden', [(0, W, z), (0, 0, z), (L, 0, z)])
 
 # ---------- Fascia-Baender ----------
-for z in (Z1, Z2, Z3):
+# Das oberste Band ist an der Westfassade unterbrochen, wo die Rampe
+# durch die Dachkante stoesst (Ankunftsoeffnung).
+for z in (Z1, Z2):
     for dz in (0.0, -0.22):
         addline('grid', [(0, W + 0.02, z + dz), (L + 0.02, W + 0.02, z + dz), (L + 0.02, 0, z + dz)])
+for dz in (0.0, -0.22):
+    addline('grid', [(0, W + 0.02, Z3 + dz), (L + 0.02, W + 0.02, Z3 + dz)])
+    addline('grid', [(L + 0.02, W - 2.6, Z3 + dz), (L + 0.02, 0, Z3 + dz)])
 
 # ---------- Stuetzen ----------
 for x in range(0, 16, 2):
@@ -77,13 +82,18 @@ for (a, b) in ((2, 7), (9, 12)):
 for (a, b) in ((4, 10),):
     clad_w(a, b, Z2, Z3)
 
-# ---------- Gelaender (alle 4 Kanten — in 3D drehbar) ----------
-addline('faint', [(0, W, Z3 + RAIL), (L, W, Z3 + RAIL), (L, 0, Z3 + RAIL), (0, 0, Z3 + RAIL), (0, W, Z3 + RAIL)])
+# ---------- Gelaender (alle 4 Kanten — mit Oeffnung an der Rampen-Ankunft) ----------
+# Die Rampe kommt am Nordende der Westfassade aufs Dach: dort ist das
+# Gelaender unterbrochen (y von W-2.6 bis W an der Kante x=L).
+GAP0 = W - 2.6
+addline('faint', [(0, W, Z3 + RAIL), (L, W, Z3 + RAIL)])
+addline('faint', [(L, GAP0, Z3 + RAIL), (L, 0, Z3 + RAIL), (0, 0, Z3 + RAIL), (0, W, Z3 + RAIL)])
 for x in range(0, 16):
     add('faint', (x, W, Z3), (x, W, Z3 + RAIL))
     add('faint', (x, 0, Z3), (x, 0, Z3 + RAIL))
 for y in range(0, 13):
-    add('faint', (L, y, Z3), (L, y, Z3 + RAIL))
+    if y <= GAP0:
+        add('faint', (L, y, Z3), (L, y, Z3 + RAIL))
     add('faint', (0, y, Z3), (0, y, Z3 + RAIL))
 
 # ---------- Route ----------
@@ -157,7 +167,17 @@ band_path += run_east(BOFF, W - 1.1, 0.9, 0.12, Z1)
 band_path += corner((-BOFF, 0.8), (0.8, -BOFF), Z1, Z1 + 0.14)
 band_path += run_south(BOFF, 0.9, L - 0.9, Z1 + 0.14, Z2)
 band_path += corner((L - 0.8, -BOFF), (L + BOFF, 0.8), Z2, Z2 + 0.14)
-band_path += run_west(BOFF, 0.9, W - 0.6, Z2 + 0.14, Z3)
+west_leg = run_west(BOFF, 0.9, W - 0.7, Z2 + 0.14, Z3)
+band_path += west_leg
+# Ankunft: Band laeuft durch die Gelaender-Oeffnung ueber die Dachkante
+# aufs Deck (wie eine Einfahrt) — so ist der Ausstieg klar erkennbar
+band_path += [(L - 0.1, W - 0.8, Z3 + 0.01), (L - 1.6, W - 0.9, Z3 + 0.01)]
+
+# Handlauf auf dem letzten sichtbaren Rampenstueck (Westfassade)
+addline('ramp', [(x, y, z + 0.34) for (x, y, z) in west_leg])
+for i in range(0, len(west_leg), 4):
+    x, y, z = west_leg[i]
+    add('ramp', (x, y, z), (x, y, z + 0.34))
 
 # ---------- Vorplatz ----------
 for i in range(4):
@@ -167,16 +187,9 @@ for i in range(4):
     gx = 0.8 + i * 2.4
     add('faint', (gx, W + 1.2, 0), (gx, W + 4.5, 0))
 
-# ---------- Labels ----------
+# ---------- Labels (nur Start/Wechselzone — Club will wenig Text) ----------
 labels = [
     {'p': [1.8, W + 3.4, 0.05], 'at': 0.03, 't': 'START / WECHSELZONE'},
-    {'p': [0.5, W + 0.5, 0.3], 'at': 0.07, 't': 'EINSTIEG — LINKS'},
-    {'p': [-0.5, 6.5, 1.1], 'at': 0.18, 't': 'OSTSEITE'},
-    {'p': [8.0, -0.5, Z1 + 0.9], 'at': 0.32, 't': 'RECHTS — SÜDSEITE'},
-    {'p': [L + 0.5, 4.0, Z2 + 0.6], 'at': 0.45, 't': 'RECHTS — WESTSEITE'},
-    {'p': [L - 0.7, W - 0.8, Z3 + 0.3], 'at': 0.56, 't': 'AUSSTIEG — DACH'},
-    {'p': [4.0, 5.5, Z3 + 0.3], 'at': 0.68, 't': 'EINE RUNDE OBEN'},
-    {'p': [L + 0.4, 10.5, Z2 + 0.2], 'at': 0.84, 't': 'RUNTER — GLEICHE STRECKE'},
 ]
 
 data = {
