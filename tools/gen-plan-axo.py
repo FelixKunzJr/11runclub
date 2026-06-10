@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
-"""Generator v2: originalgetreuere Heist-Axonometrie der ENTER Technikwelt.
+"""Generator v3: ENTER Technikwelt nach Beschreibung des Clubs (Juni 2026).
 
-Korrekturen ggü. v1 (aus Waldrap-Grundrissen EG/1.OG/2.OG/DG, Schnitt, Fotos):
-- fast quadratischer Grundriss, abgerundete Ecke(n)
-- Rampe als geschwungener Swoosh (Ease-in/out an den Podesten),
-  laeuft HINTER den aussenstehenden Betonstuetzen
-- offener Saeulengang im EG, Slab-Fascia-Baender an jedem Geschoss
-- Dach: verglastes DG-Band an der Vorderkante, Parkfelder,
-  runder Wendeltreppen-Drum, ENTER-Schriftzug
-- Route: 1 Umrundung gegen den Uhrzeigersinn, Ankunft hinten links,
-  sichtbarer Schlusslauf uebers Deck zur Wende
+- Rampe liegt auf der NORDSEITE (= Front der Zeichnung) als Kehren-Rampe:
+  Einstieg Nordseite links, 2 Rechtskurven (Kehren an den Gebaeudeenden),
+  Ankunft auf dem Dach am ANDEREN Ende, wieder Nordseite.
+- Gebaeudeecken OHNE Radius.
+- Dach: Wohnblock (Quader) an der SUEDseite, Treppenzylinder noerdlich-mittig,
+  Parkfelder dazwischen, ENTER-Schriftzug an der Nordkante.
+- Route: rauf -> eine Runde auf dem Dach -> gestrichelt dieselbe Rampe runter
+  -> zurueck zur Wechselzone (Puls dort).
 """
 import math, re, json
 
@@ -38,200 +37,179 @@ def plen(pts3):
 def ease(t):
     return t * t * (3 - 2 * t)
 
-L, W = 16.0, 13.0          # Grundriss fast quadratisch
-Z1, Z2, Z3 = 1.55, 2.75, 3.95
-RC = 1.6                   # Eckradius vordere Ecke (L,W)
+L, W = 16.0, 13.0
+Z1, Z2, Z3 = 1.35, 2.65, 3.95   # Podesthoehen der drei Rampenlaeufe
 RAIL = 0.3
 
-# ---------- Hilfen: Kanten mit gerundeter vorderer Ecke ----------
-def corner_arc(off, z0, z1=None, n=10):
-    """Viertelbogen um die vordere Ecke (L,W), off = Abstand nach aussen."""
-    z1 = z0 if z1 is None else z1
-    cx, cy, r = L - RC, W - RC, RC + off
-    pts = []
-    for i in range(n + 1):
-        a = math.radians(90 * i / n)
-        pts.append((cx + r * math.sin(a), cy + r * math.cos(a), z0 + (z1 - z0) * i / n))
-    return pts
-
-def front_right_edge(off, z):
-    """Kante von (0,W) ueber die runde Ecke nach (L,0) auf Hoehe z."""
-    return [(0, W + off, z)] + corner_arc(off, z) + [(L + off, 0, z)]
-
 bld_main, bld_grid, bld_hidden = [], [], []
-ramp, deck, ground, railing, clad, pav, sign = [], [], [], [], [], [], []
+ramp, deck, ground, railing, clad, pav, sign, arcade = [], [], [], [], [], [], [], []
 extra_svg = []
 
-# ---------- Silhouette ----------
+# ---------- Silhouette (scharfe Ecken) ----------
 bld_main += [
     seg((0, W, 0), (0, W, Z3)),
+    seg((L, W, 0), (L, W, Z3)),
     seg((L, 0, 0), (L, 0, Z3)),
-    path(front_right_edge(0, 0)),                  # Bodenkante
+    path([(0, W, 0), (L, W, 0), (L, 0, 0)]),
+    path([(0, W, Z3), (L, W, Z3), (L, 0, Z3), (0, 0, Z3)], closed=True),
 ]
-# Dach-Aussenkante: alle 4 Ecken gerundet (vorne staerker)
-def rounded_roof(z):
-    def arc(cx, cy, a0, a1, r, n=8):
-        return [(cx + r * math.cos(math.radians(a0 + (a1 - a0) * i / n)),
-                 cy + r * math.sin(math.radians(a0 + (a1 - a0) * i / n)), z) for i in range(n + 1)]
-    r2 = 0.7
-    pts = []
-    pts += arc(L - RC, W - RC, 0, 90, RC)      # vorne (L,W)... winkel: 0=+x,90=+y
-    pts += arc(r2, W - r2, 90, 180, r2)        # (0,W)
-    pts += arc(r2, r2, 180, 270, r2)           # (0,0)
-    pts += arc(L - r2, r2, 270, 360, r2)       # (L,0)
-    return pts + [pts[0]]
-bld_main.append(path(rounded_roof(Z3)))
-
 bld_hidden += [
     seg((0, 0, 0), (0, 0, Z3)),
     seg((0, 0, 0), (L, 0, 0)),
     seg((0, 0, 0), (0, W, 0)),
 ]
 for z in (Z1, Z2):
-    bld_hidden.append(path([(0, W, z), (0, 0, z), (L, 0, z)]))  # innere Decke (Roentgen)
+    bld_hidden.append(path([(0, W, z), (0, 0, z), (L, 0, z)]))
 
-# ---------- Slab-Fascia-Baender an jedem Geschoss (wrappen um die Ecke) ----------
+# ---------- Slab-Fascia-Baender ----------
 for z in (Z1, Z2, Z3):
-    bld_grid.append(path(front_right_edge(0.02, z)))
-    bld_grid.append(path(front_right_edge(0.02, z - 0.22)))
+    for dz in (0.0, -0.22):
+        bld_grid.append(path([(0, W + 0.02, z + dz), (L + 0.02, W + 0.02, z + dz), (L + 0.02, 0, z + dz)]))
 
-# ---------- Stuetzenraster (vor der Fassade) ----------
-for x in range(0, 15, 2):
+# ---------- Stuetzen ----------
+for x in range(0, 17, 2):
     bld_grid.append(seg((x, W + 0.02, 0), (x, W + 0.02, Z3)))
-for y in range(2, 12, 2):
+for y in range(1, 13, 2):
     bld_grid.append(seg((L + 0.02, y, 0), (L + 0.02, y, Z3)))
 
-# ---------- EG: offener Saeulengang (innere Wand + innere Stuetzen) ----------
-arcade = []
-arcade.append(seg((0, W - 1.8, 0), (L - 1.8, W - 1.8, 0)))          # innere Wandlinie am Boden
-arcade.append(seg((0, W - 1.8, Z1 - 0.22), (L - 1.8, W - 1.8, Z1 - 0.22)))
-for x in range(1, 15, 2):
+# ---------- EG: offener Saeulengang Nordseite ----------
+arcade.append(seg((0, W - 1.8, 0), (L, W - 1.8, 0)))
+arcade.append(seg((0, W - 1.8, Z1 - 0.22), (L, W - 1.8, Z1 - 0.22)))
+for x in range(1, 16, 2):
     arcade.append(seg((x, W - 1.8, 0), (x, W - 1.8, Z1 - 0.22)))
 
-# ---------- Wellblech in den Obergeschossen ----------
-def clad_bay_front(x0, x1, z0, z1, step=0.3):
+# ---------- Wellblech-Bays ----------
+def clad_front(x0, x1, z0, z1, step=0.3):
     x = x0 + step
     while x < x1 - 0.05:
         clad.append(seg((x, W - 0.35, z0 + 0.08), (x, W - 0.35, z1 - 0.26)))
         x += step
-def clad_bay_right(y0, y1, z0, z1, step=0.3):
+def clad_right(y0, y1, z0, z1, step=0.3):
     y = y0 + step
     while y < y1 - 0.05:
         clad.append(seg((L - 0.35, y, z0 + 0.08), (L - 0.35, y, z1 - 0.26)))
         y += step
-for (a, b) in ((0, 4), (6, 10), (12, 14.4)):
-    clad_bay_front(a, b, Z1, Z2)
-for (a, b) in ((2, 6), (8, 14.4)):
-    clad_bay_front(a, b, Z2, Z3)
-for (a, b) in ((1, 5), (7, 11)):
-    clad_bay_right(a, b, Z1, Z2)
-for (a, b) in ((3, 9),):
-    clad_bay_right(a, b, Z2, Z3)
+for (a, b) in ((0, 4), (6, 10), (12, 16)):
+    clad_front(a, b, Z1, Z2)
+for (a, b) in ((2, 6), (10, 14)):
+    clad_front(a, b, Z2, Z3)
+for (a, b) in ((1, 5), (7, 12)):
+    clad_right(a, b, 0.2, Z1)
+for (a, b) in ((1, 6), (8, 12)):
+    clad_right(a, b, Z1, Z2)
+for (a, b) in ((3, 10),):
+    clad_right(a, b, Z2, Z3)
 
-# ---------- Gelaender Dachrand (vorne + rechts, um die Ecke) ----------
-railing.append(path(front_right_edge(0, Z3 + RAIL)))
-u = 0.5
-while u < L + W - 1:                       # Posten entlang der abgewickelten Kante
-    if u <= L - RC:
-        p3 = (u, W, Z3)
-    elif u <= L - RC + RC * math.pi / 2:
-        a = (u - (L - RC)) / RC
-        p3 = (L - RC + RC * math.sin(a), W - RC + RC * math.cos(a), Z3)
-    else:
-        v = u - (L - RC) - RC * math.pi / 2
-        if W - RC - v < 0.3: break
-        p3 = (L, W - RC - v, Z3)
-    railing.append(seg(p3, (p3[0], p3[1], Z3 + RAIL)))
-    u += 1.0
+# ---------- Gelaender Dachrand ----------
+railing.append(path([(0, W, Z3 + RAIL), (L, W, Z3 + RAIL), (L, 0, Z3 + RAIL)]))
+for x in range(0, 17):
+    railing.append(seg((x, W, Z3), (x, W, Z3 + RAIL)))
+for y in range(0, 13):
+    railing.append(seg((L, y, Z3), (L, y, Z3 + RAIL)))
 
-# ---------- Rampe: Swoosh-Pfad (Route + Band) ----------
-def run_front(off, u0, u1, z0, z1, n=26):
-    return [(u0 + (u1 - u0) * i / n, W + off, z0 + (z1 - z0) * ease(i / n)) for i in range(n + 1)]
-def run_right(off, v0, v1, z0, z1, n=26):
-    return [(L + off, v0 + (v1 - v0) * i / n, z0 + (z1 - z0) * ease(i / n)) for i in range(n + 1)]
-def run_back(off, u0, u1, z0, z1, n=20):
-    return [(u0 + (u1 - u0) * i / n, -off, z0 + (z1 - z0) * ease(i / n)) for i in range(n + 1)]
-def run_left(off, v0, v1, z0, z1, n=20):
-    return [(-off, v0 + (v1 - v0) * i / n, z0 + (z1 - z0) * ease(i / n)) for i in range(n + 1)]
+# ---------- Kehren-Rampe Nordseite ----------
+# Drei Laeufe an der Nordfassade (leicht unterschiedliche Tiefe),
+# Kehren buegeln als Halbkreis ueber die Gebaeudeenden hinaus.
+YA, YB = 0.42, -0.55          # Tiefen-Offsets der Laeufe relativ zu W (aussen / innen)
+def run_x(yoff, x0, x1, z0, z1, n=26):
+    return [(x0 + (x1 - x0) * i / n, W + yoff, z0 + (z1 - z0) * ease(i / n)) for i in range(n + 1)]
+def hairpin(end, yo_from, yo_to, z0, z1, n=14):
+    """Halbkreis-Kehre ueber das Gebaeudeende hinaus (end: 'right'/'left')."""
+    cy = W + (yo_from + yo_to) / 2
+    r = abs(yo_from - yo_to) / 2
+    cx = (L - 0.1) if end == 'right' else 0.1
+    pts = []
+    for i in range(n + 1):
+        a = math.pi * i / n
+        dx = math.sin(a) * 1.1 * r          # Bauch ueber das Ende hinaus
+        x = cx + dx if end == 'right' else cx - dx
+        y = cy + (yo_from - yo_to) / 2 * math.cos(a)
+        pts.append((x, y, z0 + (z1 - z0) * i / n))
+    return pts
 
-ROFF = 0.5   # Route: knapp vor der Fassade (zwischen Stuetzen und Wand)
-# sichtbar: Vorplatz -> Front (0 -> Z1) -> runde Ecke -> rechte Seite (-> Z2)
-seg1 = [(3.2, 17.2, 0), (1.4, 15.4, 0), (0.4, W + ROFF, 0.04)]
-seg1 += run_front(ROFF, 0.5, L - RC, 0.05, Z1)
-seg1 += corner_arc(ROFF, Z1, Z1 + 0.12)
-seg1 += run_right(ROFF, W - RC, 0.4, Z1 + 0.12, Z2)
-# verdeckt: Rueckseite (-> Z3-0.5) + linke Seite (-> Z3), Ankunft hinten links
-seg2 = [seg1[-1], (L + 0.2, -0.4, Z2 + 0.04)]
-seg2 += run_back(0.4, L - 0.6, 0.6, Z2 + 0.04, Z3 - 0.5)
-seg2 += [(-0.35, 0.5, Z3 - 0.45)]
-seg2 += run_left(0.35, 0.8, 3.6, Z3 - 0.45, Z3 - 0.12)
-seg2 += [(0.3, 4.2, Z3)]
-# sichtbar: Schlusslauf uebers Deck zur Wende
-seg3 = [seg2[-1], (1.6, 4.5, Z3), (3.8, 4.9, Z3), (6.4, 5.4, Z3), (8.6, 6.2, Z3), (10.2, 7.2, Z3)]
+def switchback(off):
+    pts = []
+    pts += run_x(YA + off, 0.6, L - 0.9, 0.05, Z1)
+    pts += hairpin('right', YA + off, YB - off, Z1, Z1 + 0.22)
+    pts += run_x(YB - off, L - 0.9, 0.9, Z1 + 0.22, Z2)
+    pts += hairpin('left', YB - off, YA + off, Z2, Z2 + 0.22)
+    pts += run_x(YA + off, 0.9, L - 0.6, Z2 + 0.22, Z3)
+    return pts
 
-segs = [(seg1, False), (seg2, True), (seg3, False)]
-lens = [plen(s) for s, _ in segs]
-start_pt = P(*seg1[0])
-finish_pt = P(*seg3[-1])
+band = switchback(0.0)
+ramp.append(path(band))
+ramp.append(path([(x, y, z - 0.2) for (x, y, z) in band]))
 
-# Rampenband (sichtbare Abschnitte): Doppellinie + Gelaenderlinie, BOFF hinter Stuetzen
-BOFF = 0.06
-band_pts = run_front(BOFF, 0.0, L - RC, 0.05, Z1) + corner_arc(BOFF, Z1, Z1 + 0.12) \
-         + run_right(BOFF, W - RC, 0.2, Z1 + 0.12, Z2)
-ramp.append(path(band_pts))
-ramp.append(path([(x, y, z - 0.2) for (x, y, z) in band_pts]))
-ramp.append(path([(x, y, z + 0.34) for (x, y, z) in band_pts]))   # Gelaender auf der Rampe
-
-# ---------- Dach ----------
-# DG-Band (verglast) an der Vorderkante + Terrasse
-PV_Y0, PV_Y1, PH = W - 2.8, W - 0.9, 1.0
-pav.append(path([(1.0, PV_Y0, Z3), (14.6, PV_Y0, Z3), (14.6, PV_Y1, Z3), (1.0, PV_Y1, Z3)], closed=True))
-pav.append(path([(1.0, PV_Y0, Z3 + PH), (14.6, PV_Y0, Z3 + PH), (14.6, PV_Y1, Z3 + PH), (1.0, PV_Y1, Z3 + PH)], closed=True))
-for (xx, yy) in ((1.0, PV_Y0), (14.6, PV_Y0), (14.6, PV_Y1), (1.0, PV_Y1)):
-    pav.append(seg((xx, yy, Z3), (xx, yy, Z3 + PH)))
-x = 1.5
-while x < 14.3:
-    pav.append(seg((x, PV_Y0, Z3 + 0.06), (x, PV_Y0, Z3 + PH - 0.06)))
+# ---------- Dach-Layout ----------
+# Wohnblock (Quader) an der SUEDseite
+BX0, BX1, BY0, BY1, BH = 2.0, 12.5, 0.7, 2.9, 1.05
+pav.append(path([(BX0, BY0, Z3 + BH), (BX1, BY0, Z3 + BH), (BX1, BY1, Z3 + BH), (BX0, BY1, Z3 + BH)], closed=True))
+pav.append(path([(BX0, BY1, Z3), (BX1, BY1, Z3), (BX1, BY0, Z3)]))
+for (xx, yy) in ((BX0, BY1), (BX1, BY1), (BX1, BY0)):
+    pav.append(seg((xx, yy, Z3), (xx, yy, Z3 + BH)))
+x = BX0 + 0.5
+while x < BX1 - 0.2:
+    pav.append(seg((x, BY1, Z3 + 0.06), (x, BY1, Z3 + BH - 0.06)))
     x += 0.55
 
-# Parkfelder (zwei Reihen hinter dem DG-Band)
-for i in range(8):
-    x = 3.0 + i * 1.3
-    deck.append(seg((x, 0.8, Z3), (x, 3.1, Z3)))
-deck.append(seg((3.0, 0.8, Z3), (3.0 + 7 * 1.3, 0.8, Z3)))
-deck.append(seg((3.0, 3.1, Z3), (3.0 + 7 * 1.3, 3.1, Z3)))
-def box_top(x0, y0, x1, y1, z):
-    return path([(x0, y0, z), (x1, y0, z), (x1, y1, z), (x0, y1, z)], closed=True)
-deck.append(box_top(5.7, 1.15, 6.6, 2.8, Z3 + 0.16))   # ein Wireframe-Auto
-deck.append(box_top(5.9, 1.6, 6.4, 2.4, Z3 + 0.34))
-
-# Wendeltreppen-Drum (rund, ragt ueber das Deck)
-def drum(cx0, cy0, r, z0, z1, n=20):
-    for zz in (z1,):
-        pts = [(cx0 + r * math.cos(2 * math.pi * i / n), cy0 + r * math.sin(2 * math.pi * i / n), zz) for i in range(n + 1)]
-        deck.append(path(pts))
-    # Seitenkanten links/rechts (Tangenten)
+# Treppenzylinder noerdlich, mittig
+def drum(cx0, cy0, r, z0, z1, n=22):
+    top = [(cx0 + r * math.cos(2 * math.pi * i / n), cy0 + r * math.sin(2 * math.pi * i / n), z1) for i in range(n + 1)]
+    deck.append(path(top))
     deck.append(seg((cx0 - r, cy0, z0), (cx0 - r, cy0, z1)))
     deck.append(seg((cx0 + r, cy0, z0), (cx0 + r, cy0, z1)))
-    pts0 = [(cx0 + r * math.cos(math.pi * i / n), cy0 + r * math.sin(math.pi * i / n), z0) for i in range(n + 1)]
-    deck.append(path(pts0))
-drum(12.6, 4.0, 1.1, Z3, Z3 + 0.85)
+    front = [(cx0 + r * math.cos(math.pi + math.pi * i / n), cy0 + r * math.sin(math.pi + math.pi * i / n), z0) for i in range(n + 1)]
+    deck.append(path(front))
+drum(8.0, W - 2.9, 1.1, Z3, Z3 + 0.9)
 
-# ---------- ENTER-Schriftzug auf dem Dach (vorderkante links) ----------
-sx, sy = P(9.0, W - 0.9, Z3 + PH + 0.7)
-sign.append(seg((8.7, W - 0.9, Z3 + PH), (8.7, W - 0.9, Z3 + PH + 0.55)))
-sign.append(seg((15.0, W - 0.9, Z3 + PH), (15.0, W - 0.9, Z3 + PH + 0.55)))
-sign.append(seg((8.7, W - 0.9, Z3 + PH + 0.55), (15.0, W - 0.9, Z3 + PH + 0.55)))
+# Parkfelder mittig
+for i in range(8):
+    x = 2.6 + i * 1.3
+    deck.append(seg((x, 4.0, Z3), (x, 6.6, Z3)))
+deck.append(seg((2.6, 4.0, Z3), (2.6 + 7 * 1.3, 4.0, Z3)))
+deck.append(seg((2.6, 6.6, Z3), (2.6 + 7 * 1.3, 6.6, Z3)))
+def box_top(x0, y0, x1, y1, z):
+    return path([(x0, y0, z), (x1, y0, z), (x1, y1, z), (x0, y1, z)], closed=True)
+deck.append(box_top(5.2, 4.3, 6.1, 6.2, Z3 + 0.16))
+deck.append(box_top(5.4, 4.75, 5.9, 5.8, Z3 + 0.34))
+
+# ENTER-Schriftzug Nordkante (links, ueber dem Gelaender)
+sx, sy = P(5.8, W - 0.25, Z3 + 1.15)
+sign.append(seg((5.5, W - 0.25, Z3 + RAIL), (5.5, W - 0.25, Z3 + 1.0)))
+sign.append(seg((12.0, W - 0.25, Z3 + RAIL), (12.0, W - 0.25, Z3 + 1.0)))
+sign.append(seg((5.5, W - 0.25, Z3 + 1.0), (12.0, W - 0.25, Z3 + 1.0)))
 extra_svg.append(
     f'<text x="{sx:.1f}" y="{sy:.1f}" class="pl-sign" transform="rotate(30 {sx:.1f} {sy:.1f})">ENTER TECHNIKWELT</text>')
 
-# ---------- Vorplatz-Raster ----------
+# ---------- Vorplatz ----------
 for i in range(4):
-    g = 1.2 + i * 1.1
-    ground.append(seg((0.0, W + g, 0), (L * 0.75, W + g, 0)))
+    g = 1.4 + i * 1.1
+    ground.append(seg((0.0, W + g, 0), (L * 0.7, W + g, 0)))
 for i in range(5):
-    gx = 1.0 + i * 2.6
-    ground.append(seg((gx, W + 1.2, 0), (gx, W + 4.5, 0)))
+    gx = 1.0 + i * 2.5
+    ground.append(seg((gx, W + 1.4, 0), (gx, W + 4.6, 0)))
+
+# ---------- Route ----------
+ROFF = 0.28   # leicht vor dem Rampenband
+# rauf (sichtbar): Vorplatz -> Kehrenrampe -> Ankunft Dach rechts
+seg_up = [(2.8, 17.4, 0), (1.0, 15.2, 0), (0.6, W + YA + ROFF, 0.04)]
+seg_up += switchback(ROFF)
+seg_up += [(L - 0.4, W - 0.6, Z3)]
+# Runde auf dem Dach (sichtbar, im Uhrzeigersinn = weiter rechts rum)
+lap = [seg_up[-1],
+       (L - 0.8, W - 1.4, Z3), (L - 0.8, 2.4, Z3), (14.2, 3.4, Z3),
+       (3.2, 3.4, Z3), (1.3, 4.3, Z3), (1.3, W - 1.6, Z3),
+       (2.4, W - 0.9, Z3), (6.4, W - 0.9, Z3),
+       (10.4, W - 1.1, Z3), (L - 1.6, W - 0.8, Z3), (L - 0.5, W - 0.7, Z3)]
+# runter (gestrichelt): gleiche Rampe, parallel versetzt, zurueck zur Wechselzone
+seg_dn = [lap[-1]]
+seg_dn += list(reversed(switchback(-ROFF)))
+seg_dn += [(0.5, W + YA + 0.1, 0.04), (1.0, 15.0, 0), (2.75, 17.15, 0)]
+
+segs = [(seg_up, False), (lap, False), (seg_dn, True)]
+lens = [plen(s) for s, _ in segs]
+start_pt = P(*seg_up[0])
+finish_pt = P(2.8, 17.4, 0)
 
 # ---------- Labels ----------
 def lbl(p3, dx, dy, at, text, anchor='start'):
@@ -239,13 +217,13 @@ def lbl(p3, dx, dy, at, text, anchor='start'):
     return (x, y, x + dx, y + dy, at, text, anchor)
 
 labels = [
-    lbl(seg1[0], 14, 44, 0.04, 'START / WECHSELZONE'),
-    lbl((8.5, W + ROFF, 0.75), 46, 64, 0.16, 'RAMPE — AUSSEN UMLAUFEND'),
-    lbl((L - RC + RC, W - RC, Z1 + 0.12), 56, 22, 0.32, '+1'),
-    lbl((L + 0.4, 3.0, Z2 - 0.2), 54, -6, 0.42, '+2'),
-    lbl((8.0, -0.4, Z3 - 0.9), 10, -54, 0.55, 'RÜCKSEITE — VERDECKT', anchor='middle'),
-    lbl((-0.35, 2.2, Z3 - 0.3), -50, -8, 0.68, 'ANKUNFT DECK', anchor='end'),
-    lbl(seg3[-1], 14, -44, 0.9, 'PARKDECK — WENDE', anchor='middle'),
+    lbl(seg_up[0], 14, 44, 0.03, 'START / WECHSELZONE'),
+    lbl((5.0, W + YA, 0.5), 26, 70, 0.12, 'RAMPE — NORDSEITE'),
+    lbl((L + 0.7, W - 0.2, Z1 + 0.12), 48, 16, 0.24, 'KEHRE 1 — RECHTS'),
+    lbl((-0.9, W - 0.2, Z2 + 0.12), -42, -2, 0.40, 'KEHRE 2 — RECHTS', anchor='end'),
+    lbl((L - 0.4, W - 0.6, Z3), 36, -40, 0.52, 'ANKUNFT — ANDERES ENDE'),
+    lbl((7.5, 3.5, Z3), -6, -44, 0.66, 'EINE RUNDE AUF DEM DECK', anchor='middle'),
+    lbl((11.5, W + YA - 0.3, Z1 + 0.55), 56, 54, 0.86, 'RUNTER — GLEICHE RAMPE'),
 ]
 
 # ---------- Bounding box ----------
@@ -283,7 +261,7 @@ for (x, y, lx, ly, at, text, anchor) in labels:
   <text x="{lx:.1f}" y="{ly + (15 if ly > y else -7):.1f}" text-anchor="{anchor}" class="pl-txt">{text}</text>
 </g>''')
 
-svg = f'''<svg id="planSvg" viewBox="0 0 {vw:.0f} {vh:.0f}" xmlns="http://www.w3.org/2000/svg" font-family="'IBM Plex Mono', monospace" aria-label="Isometrische Zeichnung der ENTER Technikwelt mit der Hillclimb-Route über die Aussenrampe aufs Parkdeck" role="img">
+svg = f'''<svg id="planSvg" viewBox="0 0 {vw:.0f} {vh:.0f}" xmlns="http://www.w3.org/2000/svg" font-family="'IBM Plex Mono', monospace" aria-label="Isometrische Zeichnung der ENTER Technikwelt: Kehren-Rampe auf der Nordseite aufs Parkdeck, eine Runde oben, gleiche Rampe runter" role="img">
 <g transform="translate({tx:.1f},{ty:.1f})">
 {G('pg pg-hidden', bld_hidden)}
 {G('pg pg-faint', clad)}
@@ -313,17 +291,17 @@ svg = f'''<svg id="planSvg" viewBox="0 0 {vw:.0f} {vh:.0f}" xmlns="http://www.w3
 </g>
 </svg>'''
 
-with open('plan2.svg', 'w') as f:
+with open('plan3.svg', 'w') as f:
     preview = svg.replace('<svg ', '<svg style="background:#0D0C0B" ', 1)
     preview = re.sub(r'stroke-dashoffset="\d+"', 'stroke-dashoffset="0"', preview)
     style = '''<style>
-.pg path, .pg ellipse {stroke:#F4F1EB; stroke-width:1; fill:none; opacity:.42}
+.pg path {stroke:#F4F1EB; stroke-width:1; fill:none; opacity:.42}
 .pg-main path {stroke-width:1.8; opacity:.95}
 .pg-faint path {stroke-width:.6; opacity:.22}
 .pg-hidden path {stroke-dasharray:4 5; opacity:.16}
 .pg-ramp path {stroke-width:1.2; opacity:.6}
 .route {stroke:#EE3829; stroke-width:4; fill:none; stroke-linejoin:round; stroke-linecap:round}
-.route--hidden {stroke-width:2.2; opacity:.45}
+.route--hidden {stroke-width:2.4; opacity:.5}
 .route-mask {stroke:#0D0C0B; stroke-width:3.5; fill:none; stroke-dasharray:5 7}
 .pm-c,.pm-pulse {stroke:#EE3829; fill:none; stroke-width:1.5}
 .pm-d {fill:#EE3829}
@@ -334,7 +312,7 @@ with open('plan2.svg', 'w') as f:
 </style>'''
     f.write(preview.replace('</svg>', style + '</svg>'))
 
-with open('plan2_embed.svg', 'w') as f:
+with open('plan3_embed.svg', 'w') as f:
     f.write(svg)
 
 print(f"viewBox 0 0 {vw:.0f} {vh:.0f}")
