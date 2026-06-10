@@ -220,6 +220,8 @@
     background: var(--chalk); margin: 4px auto 0;
   }
   .plan__gl-label.on { opacity: 1; }
+  .plan__gl-compass { color: var(--ash); font-size: 10px; letter-spacing: 0; }
+  .plan__gl-compass::after { display: none; }
 
   @media (max-width: 860px) {
     .plan__stage { flex-direction: column; justify-content: flex-start; gap: 12px; align-items: flex-start; padding-top: 86px; }
@@ -883,8 +885,10 @@
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(33, 1, 0.1, 400);
 
-  // Modellwelt: x Ost→West, y Sued→Nord, z hoch → three.js: (x, z, −y)
-  const V = (p) => new THREE.Vector3(p[0] - D.L / 2, p[2], -(p[1] - D.W / 2));
+  // Modellwelt: x Ost→West, y Sued→Nord, z hoch.
+  // three.js ist rechtshaendig → Abbildung (+X = OST, +Y = oben, +Z = SUED),
+  // sonst rendert die Szene spiegelverkehrt (Ost/West vertauscht):
+  const V = (p) => new THREE.Vector3(D.L / 2 - p[0], p[2], D.W / 2 - p[1]);
 
   // Schwarze Volumen sorgen fuer echte Verdeckung der roten Linie
   const black = new THREE.MeshBasicMaterial({ color: 0x0d0c0b, polygonOffset: true, polygonOffsetFactor: 2, polygonOffsetUnits: 2 });
@@ -945,6 +949,15 @@
     wrap.appendChild(el);
     return { el, v: V(l.p), at: l.at };
   });
+  // Kompass (immer sichtbar, zum Pruefen der Orientierung)
+  for (const [txt, p] of [['N', [D.L / 2, D.W + 4.2, 0]], ['O', [-2.5, D.W / 2, 0]],
+                          ['S', [D.L / 2, -2.5, 0]], ['W', [D.L + 2.5, D.W / 2, 0]]]) {
+    const el = document.createElement('div');
+    el.className = 'plan__gl-label plan__gl-compass';
+    el.textContent = txt;
+    wrap.appendChild(el);
+    labels.push({ el, v: V(p), at: 0 });
+  }
 
   // Kamera: Blick von Nordwesten, leichtes Schwanken bis zum ersten Drehen.
   // Die Distanz wird automatisch so gewaehlt, dass die ganze Szene in den
@@ -953,7 +966,7 @@
   const target = sphere.center.clone();
   let R = 1;
   const POLAR = .48;
-  const AZ0 = Math.PI * .78;
+  const AZ0 = -Math.PI * .78;   // Azimut Nordwest (X=Ost, Z=Sued)
   const controls = new OrbitControls(camera, renderer.domElement);
   controls.target.copy(target);
   controls.enableZoom = false;
