@@ -47,6 +47,7 @@
     padding: 18px clamp(20px, 4vw, 56px);
     position: sticky; top: 0; z-index: 100;
     background: color-mix(in srgb, var(--black) 80%, transparent);
+    -webkit-backdrop-filter: blur(14px);
     backdrop-filter: blur(14px);
     border-bottom: 1px solid rgba(244,241,235,.12);
   }
@@ -74,6 +75,7 @@
   /* hero */
   .hero {
     min-height: calc(100vh - 120px);
+    min-height: calc(100svh - 120px); /* mobile: ohne URL-Leiste rechnen */
     display: flex; flex-direction: column; justify-content: center;
     padding: 50px clamp(20px, 4vw, 56px);
     position: relative; overflow: hidden;
@@ -234,6 +236,29 @@
     .plan__fig { width: 100%; height: auto; }
     .plan__fig svg { height: auto; max-height: 44vh; }
     .plan__gl { height: 52vh; }
+  }
+
+  /* ---- mobile ---- */
+  @media (max-width: 760px) {
+    .nav__links a:not(.btn) { display: none; }
+    .nav__links .btn { padding: 11px 16px; font-size: 12px; }
+    .nav__badge { width: 38px; height: 38px; font-size: 16px; }
+    nav { padding-block: 14px; }
+
+    h1 { font-size: clamp(54px, 17.5vw, 112px); }
+    .ramp { opacity: .35; }
+    .hero__sub { margin-top: 28px; gap: 18px; }
+    .datechip { padding: 14px 18px; font-size: 14px; }
+
+    /* Stats fix als 2×2 — auto-fit verteilt die Borders sonst falsch */
+    .stats { grid-template-columns: 1fr 1fr; }
+    .stat { padding: 24px 20px; border-right: none; }
+    .stat:nth-child(odd) { border-right: 1.5px solid rgba(244,241,235,.18); }
+    .stat:nth-child(-n+2) { border-bottom: 1.5px solid rgba(244,241,235,.18); }
+
+    .profile-card { padding: 18px 14px; box-shadow: 6px 6px 0 var(--red); }
+    .fact { padding: 14px 2px; }
+    footer { flex-direction: column; gap: 10px; }
   }
 
   /* ablauf (red) */
